@@ -28,10 +28,19 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/services", async (req, res) => {
-      const user = req.body;
-      const result = await appointmentCollection.insertOne(user);
-      res.send(result);
+    app.post("/appointment", async (req, res) => {
+      const appointmentData = req.body;
+      const query = {
+        treatmentId: appointmentData.treatmentId,
+        date: appointmentData.date,
+        patientEmail: appointmentData.patientEmail,
+      };
+      const exist = await appointmentCollection.findOne(query);
+      if (exist) {
+        return res.send({ success: false, appointment: exist });
+      }
+      const result = await appointmentCollection.insertOne(appointmentData);
+      res.send({ success: true, result });
     });
   } finally {
     // await client.close();
